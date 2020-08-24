@@ -140,16 +140,21 @@ pub fn launch_tarpaulin(
 
     let mut result = TraceMap::new();
     let mut return_code = 0i32;
+    info!("NExt");
     info!("Building project");
     let executables = cargo::get_tests(config)?;
+    info!("NExt");
     if !config.no_run {
         let project_analysis = SourceAnalysis::get_analysis(config);
         let project_analysis = project_analysis.lines;
+        info!("NExt");
         for exe in &executables {
             if exe.should_panic() {
                 info!("Running a test executable that is expected to panic");
             }
+            info!("NExt");
             let coverage = get_test_coverage(&exe, &project_analysis, config, false, logger)?;
+            info!("NExt");
             if let Some(res) = coverage {
                 result.merge(&res.0);
                 return_code |= if exe.should_panic() {
@@ -158,6 +163,7 @@ pub fn launch_tarpaulin(
                     res.1
                 };
             }
+            info!("NExt");
             if config.run_ignored {
                 let coverage = get_test_coverage(&exe, &project_analysis, config, true, logger)?;
                 if let Some(res) = coverage {
@@ -165,9 +171,11 @@ pub fn launch_tarpaulin(
                     return_code |= res.1;
                 }
             }
+            info!("NExt");
         }
         result.dedup();
     }
+    info!("NExt");
     Ok((result, return_code))
 }
 

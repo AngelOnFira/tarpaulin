@@ -2,7 +2,7 @@ use crate::config::*;
 use crate::errors::RunError;
 use crate::path_utils::get_source_walker;
 use cargo_metadata::{diagnostic::DiagnosticLevel, CargoOpt, Message, Metadata, MetadataCommand};
-use log::{error, trace, warn};
+use log::{error, info, trace, warn};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::env;
@@ -107,12 +107,16 @@ pub fn get_tests(config: &Config) -> Result<Vec<TestBinary>, RunError> {
         .exec()
         .map_err(|e| RunError::Cargo(e.to_string()))?;
 
+    info!("3");
     for ty in &config.run_types {
         run_cargo(&metadata, manifest, config, Some(*ty), &mut result)?;
     }
+    info!("4");
     if config.has_named_tests() {
+        info!("5");
         run_cargo(&metadata, manifest, config, None, &mut result)?
     } else if config.run_types.is_empty() {
+        info!("6");
         run_cargo(
             &metadata,
             manifest,
@@ -138,7 +142,8 @@ fn run_cargo(
         clean_doctest_folder(&config.doctest_dir());
         cmd.stdout(Stdio::null());
     }
-    trace!("Running command {:?}", cmd);
+    info!("3");
+    info!("Running command {:?}", cmd);
     let mut child = cmd.spawn().map_err(|e| RunError::Cargo(e.to_string()))?;
 
     if ty != Some(RunType::Doctests) {
@@ -295,6 +300,7 @@ fn create_command(manifest_path: &str, config: &Config, ty: Option<RunType>) -> 
             test_cmd.arg(format!("+{}", toolchain));
         }
         test_cmd.args(&["test", "--no-run"]);
+        test_cmd.args(&["--verbose"]);
     }
     test_cmd.args(&["--message-format", "json", "--manifest-path", manifest_path]);
     if let Some(ty) = ty {
